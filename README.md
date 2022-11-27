@@ -1,49 +1,83 @@
 # WIK-DPS-TP01
 
-Voici le rendu du TP 1 de devops, le but de ce tp était de faire une API qui retourne les headers d'un requête effectuée sur la route /ping et une réponse avec un code 404 sur les autres routes, j'ai fait cette API en rust, voici les instructions d'utilisation:
+Voici le rendu du TP 2 de devops, le but de ce tp était de faire 2 images docker (la premiere avec un seul stage et la seconde avec 2) permettant de lancer l'API faite lors du TP1
 
-## Instructions
-### Installation
+## Image 1
+### contenu
 
-Tout d'abord il faut cloner ce repertoire git là où on veut:
+voici le [dockerfile](Dockerfile) de l'image 1:
+```
+FROM rust:latest
+WORKDIR /usr/src/TP-WIK-DPS-02
+COPY . .
+RUN cargo build
+CMD ["./target/debug/TP-WIK-DPS-TP02"]
+```
+### Fonctionnement
+
+Il suffit de le build pour creer l'image après avoir cloné le repertoire:
 
 ```
-git clone https://github.com/Lucas999999/WIK-DPS-TP01.git
+docker build -f Dockerfile -t [nom]
 ```
 
-Ensuite il nous faut cargo, le gestionnaire de paquets de Rust, c'est le plus simple pour lancer le projet.
-voici la doc de [cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html).
-
-Sur linux:
+puis ensuite on peut le lancer comme un conteneur classique
 
 ```
-curl https://sh.rustup.rs -sSf | sh
-```
-Sur windows:
-
-[rustup-init.exe](https://win.rustup.rs/)
-
-Ou alors avec votre gestionnaire de paquets préféré.
-### Utilisation
-
-Maintenant que nous avons tout ce qu'il faut il ne reste plus qu'à lancer le projet, c'est la partie la plus simple, il suffit de taper:
-
-```
-cargo run
+docker run -p 3333:3333 [nom]
 ```
 
-on peut également préciser un port sur lequel le serveur va écouter (le port de base est 3333) pour cela il faut définir une variable d'environnement "PING_LISTEN_PORT" qui a pour valeur le port voulu.
-
-Pour créer une variable d'environnement:
-
-sur linux:
+on peut vérifier que cela fonctionne:
 
 ```
-export PING_LISTEN_PORT=4444
+[hurlu@monke DevOps]$ curl localhost:3333/ping
+{"Host":"localhost:3333","User-Agent":"curl/7.86.0","Accept":"*/*"}
 ```
 
-sur windows:
+### Trivy
+
+l'image a été scannée avec trivy, le scan se trouve ici:
+[image 1](trivy1.md)
+
+On se rend compte que beaucoup de vulnérabilités ont été retournées à la suite de ce scan
+
+## Image 2
+### contenu
+
+voici le [dockerfile](Dockerfile2) de l'image 2:
+```
+FROM rust:latest as builder
+WORKDIR /usr/src/TP-WIK-DPS-02
+COPY . .
+RUN cargo build
+
+FROM builder as exec
+CMD ["./target/debug/TP-WIK-DPS-TP02"]
+```
+### Fonctionnement
+
+Il suffit de le build pour creer l'image après avoir cloné le repertoire:
 
 ```
-$env:PING_LISTEN_PORT = '4444'
+docker build -f Dockerfile2 -t [nom]
 ```
+
+puis ensuite on peut le lancer comme un conteneur classique
+
+```
+docker run -p 3333:3333 [nom]
+```
+
+on peut vérifier que cela fonctionne:
+
+```
+[hurlu@monke DevOps]$ curl localhost:3333/ping
+{"Host":"localhost:3333","User-Agent":"curl/7.86.0","Accept":"*/*"}
+```
+
+### Trivy
+
+l'image a été scannée avec trivy, le scan se trouve ici:
+[image 2](trivy2.md)
+
+Encore une fois il y a tout autant de vulnérabilités
