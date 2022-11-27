@@ -1,5 +1,5 @@
 
-testrust1 (debian 11.5)
+testrust2 (debian 11.5)
 =======================
 Total: 1221 (UNKNOWN: 3, LOW: 572, MEDIUM: 287, HIGH: 345, CRITICAL: 14)
 
